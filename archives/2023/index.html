@@ -18,9 +18,9 @@
 <link rel="stylesheet" href="../../lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="../../lib/iconfont/iconfont.css?v=1701255861666">
+<link rel="stylesheet" href="../../lib/iconfont/iconfont.css?v=1701259887787">
 
-<link rel="stylesheet" href="../../css/style.css?v=1701255861666">
+<link rel="stylesheet" href="../../css/style.css?v=1701259887787">
 
 
 
@@ -32,7 +32,7 @@
 <script src="../../lib/lax.min.js" async></script>
 
 
-<script async src="../../js/app.js?v=1701255861666"></script>
+<script async src="../../js/app.js?v=1701259887787"></script>
 
  
 
@@ -217,7 +217,22 @@
         &copy; 2023 arr2
         Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
         & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
-        
+        <ul>
+  <li>
+    本页被打开了
+    <span class="waline-pageview-count" />
+    次
+  </li>
+</ul>
+<script type="module">
+  import { pageviewCount } from '/images/waline.mjs';
+
+  pageviewCount({
+    serverURL: 'https://blog-comments-sepia.vercel.app',
+    path: window.location.pathname,
+  });
+</script>
+
     </div>
 </div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><section class="nexmoe-posts">
     <div class="nexmoe-post">
