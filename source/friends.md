@@ -1,5 +1,5 @@
 ---
-title: 友链
+title: 友情链接
 permalink: /friends.html
 cover: /images/FkvGGqTUUAAs6su_res.webp
 coverWidth: 1600

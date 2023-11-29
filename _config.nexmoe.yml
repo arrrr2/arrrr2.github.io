@@ -39,7 +39,9 @@ menu:
     关于自己:
         - /about.html
         - icon-info-circle
-
+    留言板:
+        - /comment_board.html
+        - icon-info-circle
 widgets:
     - name: search
       enable: true
@@ -128,14 +130,49 @@ widgets:
 #   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2058306854838448" crossorigin="anonymous"></script>
 
 # # 自定义侧边栏尾部内容
-# slotSidebar: |
-#   <br><a target="_blank" href="https://beian.miit.gov.cn/">鄂ICP备2020018486号</a>
-#   <br><a target="_blank" href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral">
-#   <img src="https://i.dawnlab.me/c0268c1e6cfd0863d6ba35be1575941a.png" width="150px"></a>
+slotSidebar: |
+    <ul>
+      <li>
+        本页被打开了
+        <span class="waline-pageview-count" />
+        次
+      </li>
+    </ul>
+    <script type="module">
+      import { pageviewCount } from '/images/waline.mjs';
+
+      pageviewCount({
+        serverURL: 'https://blog-comments-sepia.vercel.app',
+        path: window.location.pathname,
+      });
+    </script>
+
+
+# <li>
+#   <span class="waline-pageview-count" data-path="/" />
+# </li>
 
 # # 评论框插槽
-# slotComment: | 
-#   请在你的配置文件中设置 slotComment
+slotComment: | 
+    <head>
+      <!-- ... -->
+      <link
+        rel="stylesheet"
+        href="/images/waline.css"
+      />
+      <!-- ... -->
+    </head>
+    <body>
+      <!-- ... -->
+      <div id="waline"></div>
+      <script type="module">
+        import { init } from '/images/waline.mjs';
+        init({
+          el: '#waline',
+          serverURL: 'https://blog-comments-sepia.vercel.app',
+        });
+      </script>
+    </body>
 
 # slotCopyright: | 
 #   <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可

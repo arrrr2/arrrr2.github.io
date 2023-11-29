@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh"><head>
-<title>友链 - arr2&#39;s blog</title>
+<title>友情链接 - arr2&#39;s blog</title>
 <meta charset="UTF-8">
 <meta name="keywords" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
@@ -8,13 +8,13 @@
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 <meta name="description" content="echo 的个人主页">
 <meta property="og:type" content="website">
-<meta property="og:title" content="友链">
+<meta property="og:title" content="友情链接">
 <meta property="og:url" content="https://arrrr2.github.io/friends.html">
 <meta property="og:site_name" content="arr2&#39;s blog">
 <meta property="og:description" content="echo 的个人主页">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2023-11-29T08:34:36.170Z">
-<meta property="article:modified_time" content="2023-11-29T08:34:36.170Z">
+<meta property="article:published_time" content="2023-11-29T10:59:40.299Z">
+<meta property="article:modified_time" content="2023-11-29T10:59:40.299Z">
 <meta property="article:author" content="arr2">
 <meta name="twitter:card" content="summary">
 
@@ -22,9 +22,9 @@
 <link rel="stylesheet" href="lib/mdui_043tiny/mdui.css">
 
 
-<link rel="stylesheet" href="lib/iconfont/iconfont.css?v=1701246965710">
+<link rel="stylesheet" href="lib/iconfont/iconfont.css?v=1701259887778">
 
-<link rel="stylesheet" href="css/style.css?v=1701246965710">
+<link rel="stylesheet" href="css/style.css?v=1701259887778">
 
 
 
@@ -36,7 +36,7 @@
 <script src="lib/lax.min.js" async></script>
 
 
-<script async src="js/app.js?v=1701246965710"></script>
+<script async src="js/app.js?v=1701259887778"></script>
 
  
 
@@ -81,6 +81,13 @@
             <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
             <div class="mdui-list-item-content">
                 关于自己
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="/comment_board.html" title="留言板">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                留言板
             </div>
         </a>
         
@@ -214,14 +221,29 @@
         &copy; 2023 arr2
         Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
         & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
-        
+        <ul>
+  <li>
+    本页被打开了
+    <span class="waline-pageview-count" />
+    次
+  </li>
+</ul>
+<script type="module">
+  import { pageviewCount } from '/images/waline.mjs';
+
+  pageviewCount({
+    serverURL: 'https://blog-comments-sepia.vercel.app',
+    path: window.location.pathname,
+  });
+</script>
+
     </div>
 </div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
   <article>
     
         <div class="nexmoe-post-cover absolute" style="padding-top: 62.5%;"> 
-            <img src="/images/FkvGGqTUUAAs6su_res.webp" alt="友链" loading="lazy">
-            <h1>友链</h1>
+            <img src="/images/FkvGGqTUUAAs6su_res.webp" alt="友情链接" loading="lazy">
+            <h1>友情链接</h1>
         </div>
     
     
@@ -254,12 +276,31 @@
 </div>
   
   
-    <script async src="js/copy-codeblock.js?v=1701246965693"></script>
+    <script async src="js/copy-codeblock.js?v=1701259887760"></script>
   
 
   
       <div class="nexmoe-post-footer">
-          
+          <head>
+  <!-- ... -->
+  <link
+    rel="stylesheet"
+    href="/images/waline.css"
+  />
+  <!-- ... -->
+</head>
+<body>
+  <!-- ... -->
+  <div id="waline"></div>
+  <script type="module">
+    import { init } from '/images/waline.mjs';
+    init({
+      el: '#waline',
+      serverURL: 'https://blog-comments-sepia.vercel.app',
+    });
+  </script>
+</body>
+
       </div>
   
 </div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
