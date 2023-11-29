@@ -1,7 +1,9 @@
 ---
 title: 友链
 permalink: /friends.html
-cover: /2023/11/29/Hello-World/78539830_p0.webp
+cover: /images/FkvGGqTUUAAs6su_res.webp
 coverWidth: 1600
 coverHeight: 1000
 ---
+
+<a href='https://void-echo.github.io/'> echo 的个人主页 </a>
