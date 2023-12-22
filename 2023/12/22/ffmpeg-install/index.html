@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>FFmpeg 从入门到升天：1) Linux 下编译安装 - arr2&#39;s blog</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<meta name="description" content="FFmpeg 好难用啊，但是又不能不用，我爱说实话。 说在前面本篇内容参照 https:&#x2F;&#x2F;trac.ffmpeg.org&#x2F;wiki&#x2F;CompilationGuide&#x2F;Ubuntu 在 2023.12.22 的内容进行翻译（整理）。如有问题，可以过去看教程。虽然各个 linux 发行版都可以直接安装，但是考虑到可能缺少编码器，难以 debug 等种种原因，总会有人选择手动编译安装。因此这篇教程就是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FFmpeg 从入门到升天：1) Linux 下编译安装">
+<meta property="og:url" content="https://arrrr2.github.io/2023/12/22/ffmpeg-install/index.html">
+<meta property="og:site_name" content="arr2&#39;s blog">
+<meta property="og:description" content="FFmpeg 好难用啊，但是又不能不用，我爱说实话。 说在前面本篇内容参照 https:&#x2F;&#x2F;trac.ffmpeg.org&#x2F;wiki&#x2F;CompilationGuide&#x2F;Ubuntu 在 2023.12.22 的内容进行翻译（整理）。如有问题，可以过去看教程。虽然各个 linux 发行版都可以直接安装，但是考虑到可能缺少编码器，难以 debug 等种种原因，总会有人选择手动编译安装。因此这篇教程就是">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-12-22T06:45:00.000Z">
+<meta property="article:modified_time" content="2023-12-22T07:20:41.870Z">
+<meta property="article:author" content="arr2">
+<meta name="twitter:card" content="summary">
+
+<link rel="stylesheet" href="../../../../lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="../../../../lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="../../../../lib/iconfont/iconfont.css?v=1703230302286">
+
+<link rel="stylesheet" href="../../../../css/style.css?v=1703230302286">
+
+
+
+
+
+
+<script src="../../../../lib/mdui_043tiny/mdui.js" async></script>
+<script src="../../../../lib/fancybox/fancybox.umd.js" async></script>
+<script src="../../../../lib/lax.min.js" async></script>
+
+
+<script async src="../../../../js/app.js?v=1703230302286"></script>
+
+ 
+
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 7.0.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(https://i.dawnlab.me/b5a7e61560facdd5b8aa9683fce147d7.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="../../../../index.html" title="arr2"><img src="/images/rin.webp" alt="arr2"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="../../../../index.html" title="arr2">
+            <img src="/images/rin.webp" alt="arr2" alt="arr2">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>2</div>
+        <div><span>标签</span>0</div>
+        <div><span>分类</span>0</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../index.html" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../friends.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../about.html" title="关于自己">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于自己
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../comment_board.html" title="留言板">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                留言板
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://qq.com"
+			target="_blank"
+			mdui-tooltip="{content: 'QQ'}"
+			style="
+				color: rgb(249, 174, 8);
+				background-color: rgba(249, 174, 8, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-QQ"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://bilibili.com"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://www.zhihu.com/"
+			target="_blank"
+			mdui-tooltip="{content: '知乎'}"
+			style="
+				color: rgb(30, 136, 229);
+				background-color: rgba(30, 136, 229, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-zhihu"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://twitter.com/"
+			target="_blank"
+			mdui-tooltip="{content: 'Twitter'}"
+			style="
+				color: rgb(59, 151, 239);
+				background-color: rgba(59, 151, 239, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-twitter"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+
+    
+        
+        
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="../../../../archives/2023/">2023</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">最新文章</h3>
+    <div class="nexmoe-widget">
+      <ul>
+        
+          <li>
+            <a href="">FFmpeg 从入门到升天：1) Linux 下编译安装</a>
+          </li>
+        
+          <li>
+            <a href="../../../11/29/Hello-World/">Hello World!</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+   
+    <div class="nexmoe-copyright">
+        &copy; 2023 arr2
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        <ul>
+  <li>
+    本页被打开了
+    <span class="waline-pageview-count" />
+    次
+  </li>
+</ul>
+<script type="module">
+  import { pageviewCount } from '/images/waline.mjs';
+
+  pageviewCount({
+    serverURL: 'https://blog-comments-sepia.vercel.app',
+    path: window.location.pathname,
+  });
+</script>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: 56.25%;"> 
+            <img src="/2023/12/22/ffmpeg-install/neko.webp" alt="FFmpeg 从入门到升天：1) Linux 下编译安装" loading="lazy">
+            <h1>FFmpeg 从入门到升天：1) Linux 下编译安装</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2023年12月22日</a>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <p>FFmpeg 好难用啊，但是又不能不用，我爱说实话。</p>
+<h2 id="说在前面"><a href="#说在前面" class="headerlink" title="说在前面"></a>说在前面</h2><p>本篇内容参照 <a target="_blank" rel="noopener" href="https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu">https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu</a> 在 2023.12.22 的内容进行翻译（整理）。<br>如有问题，可以过去看教程。<br>虽然各个 linux 发行版都可以直接安装，但是考虑到可能缺少编码器，难以 debug 等种种原因，总会有人选择手动编译安装。<br>因此这篇教程就是这么用的。  </p>
+<h2 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h2><p>把 <code>make</code> 改成 <code>make -j$(nproc)</code>。<br>不想使用全部的线程也可以指定，如 <code>make -j8</code>。</p>
+<h2 id="首先确定安装的位置"><a href="#首先确定安装的位置" class="headerlink" title="首先确定安装的位置"></a>首先确定安装的位置</h2><p>在官方说明中，所有中间文件放在用户文件夹的 ffmpeg_sources 和 ffmpg_build 下。这里为方便整理，专门创建一个文件夹用于整理ffmpeg的文件：<br><code>FFMPEG_PATH=$HOME/data/ffmpeg</code><br>如果想完全按照官方，将所有内容放在用户文件夹下（即 &#x2F;home），那么只需要将上面改成<br><code>FFMPEG_PATH=$HOME</code><br>在 FFMPEG_PATH 下，先创建三个文件夹：<br><code>mkdir -p $FFMPEG_PATH/ffmpeg_sources $FFMPEG_PATH/ffmpeg_build ~/bin</code></p>
+<h2 id="基础库的安装"><a href="#基础库的安装" class="headerlink" title="基础库的安装"></a>基础库的安装</h2><p>执行：  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update -qq &amp;&amp; sudo apt-get -y install \</span><br><span class="line">  autoconf \</span><br><span class="line">  automake \</span><br><span class="line">  build-essential \</span><br><span class="line">  cmake \</span><br><span class="line">  git-core \</span><br><span class="line">  libass-dev \</span><br><span class="line">  libfreetype6-dev \</span><br><span class="line">  libgnutls28-dev \</span><br><span class="line">  libmp3lame-dev \</span><br><span class="line">  libsdl2-dev \</span><br><span class="line">  libtool \</span><br><span class="line">  libva-dev \</span><br><span class="line">  libvdpau-dev \</span><br><span class="line">  libvorbis-dev \</span><br><span class="line">  libxcb1-dev \</span><br><span class="line">  libxcb-shm0-dev \</span><br><span class="line">  libxcb-xfixes0-dev \</span><br><span class="line">  meson \</span><br><span class="line">  ninja-build \</span><br><span class="line">  pkg-config \</span><br><span class="line">  texinfo \</span><br><span class="line">  wget \</span><br><span class="line">  yasm \</span><br><span class="line">  zlib1g-dev</span><br></pre></td></tr></table></figure>
+<p>根据官方说明，Ubuntu 20.04 还需执行<br><code>sudo apt install libunistring-dev libaom-dev libdav1d-dev</code><br>如果 libdav1d-dev 无法安装，可以先放弃，之后编译安装。  </p>
+<p>完事之后安装音视频相关的库。其中包括 x26x, vpx, aac, opus 和它们的依赖。<br><code>sudo apt-get install nasm libx264-dev libx265-dev libnuma-dev libvpx-dev libfdk-aac-dev libopus-dev</code></p>
+<h2 id="没办法直接安装的库"><a href="#没办法直接安装的库" class="headerlink" title="没办法直接安装的库"></a>没办法直接安装的库</h2><p>三个av1的编解码器：aom-av1, dav1d-av1, svt-av1<br>虽然它们的功能是一致的，但考虑到可能具有不一样的特性，建议全部选装。<br>vmaf 是视频质量的评价标准之一，科研中可能会用到，建议选装。<br>其中，从 Ubuntu 22.04LTS 起 dav1d 提供了官方包，可以使用<code>sudo apt-get install libdav1d-dev</code>，不需要手动安装。  </p>
+<p>aom-av1：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> FFMPEG_PATH=<span class="variable">$HOME</span>/data/ffmpeg_sources &amp;&amp; \</span><br><span class="line">git -C aom pull 2&gt; /dev/null || git <span class="built_in">clone</span> --depth 1 https://aomedia.googlesource.com/aom &amp;&amp; \</span><br><span class="line"><span class="built_in">mkdir</span> -p aom_build &amp;&amp; \</span><br><span class="line"><span class="built_in">cd</span> aom_build &amp;&amp; \</span><br><span class="line">PATH=<span class="string">&quot;<span class="variable">$HOME</span>/bin:<span class="variable">$PATH</span>&quot;</span> cmake -G <span class="string">&quot;Unix Makefiles&quot;</span> -DCMAKE_INSTALL_PREFIX=<span class="string">&quot;<span class="variable">$FFMPEG_PATH</span>/ffmpeg_build&quot;</span> -DENABLE_TESTS=OFF -DENABLE_NASM=on ../aom &amp;&amp; \</span><br><span class="line">PATH=<span class="string">&quot;<span class="variable">$HOME</span>/bin:<span class="variable">$PATH</span>&quot;</span> make &amp;&amp; \</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>dav1d-av1：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cd FFMPEG_PATH=$HOME/data/ffmpeg_sources &amp;&amp; \</span><br><span class="line">git -C SVT-AV1 pull 2&gt; /dev/null || git clone https://gitlab.com/AOMediaCodec/SVT-AV1.git &amp;&amp; \</span><br><span class="line">mkdir -p SVT-AV1/build &amp;&amp; \</span><br><span class="line">cd SVT-AV1/build &amp;&amp; \</span><br><span class="line">PATH=&quot;$HOME/bin:$PATH&quot; cmake -G &quot;Unix Makefiles&quot; -DCMAKE_INSTALL_PREFIX=&quot;$FFMPEG_PATH/ffmpeg_build&quot; -DCMAKE_BUILD_TYPE=Release -DBUILD_DEC=OFF -DBUILD_SHARED_LIBS=OFF .. &amp;&amp; \</span><br><span class="line">PATH=&quot;$HOME/bin:$PATH&quot; make &amp;&amp; \</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>svt-av1:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cd FFMPEG_PATH=$HOME/data/ffmpeg_sources &amp;&amp; \</span><br><span class="line">git -C dav1d pull 2&gt; /dev/null || git clone --depth 1 https://code.videolan.org/videolan/dav1d.git &amp;&amp; \</span><br><span class="line">mkdir -p dav1d/build &amp;&amp; \</span><br><span class="line">cd dav1d/build &amp;&amp; \</span><br><span class="line">meson setup -Denable_tools=false -Denable_tests=false --default-library=static .. --prefix &quot;$FFMPEG_PATH/ffmpeg_build&quot; --libdir=&quot;$FFMPEG_PATH/ffmpeg_build/lib&quot; &amp;&amp; \</span><br><span class="line">ninja &amp;&amp; \</span><br><span class="line">ninja install</span><br></pre></td></tr></table></figure>
+
+
+<p>libvmaf: </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cd FFMPEG_PATH=$HOME/data/ffmpeg_sources &amp;&amp; \</span><br><span class="line">wget https://github.com/Netflix/vmaf/archive/v2.3.1.tar.gz &amp;&amp; \</span><br><span class="line">tar xvf v2.3.1.tar.gz &amp;&amp; \</span><br><span class="line">mkdir -p vmaf-2.3.1/libvmaf/build &amp;&amp;\</span><br><span class="line">cd vmaf-2.3.1/libvmaf/build &amp;&amp; \</span><br><span class="line">meson setup -Denable_tests=false -Denable_docs=false --buildtype=release --default-library=static .. --prefix &quot;$FFMPEG_PATH/ffmpeg_build&quot; --bindir=&quot;$HOME/bin&quot; --libdir=&quot;$FFMPEG_PATH/ffmpeg_build/lib&quot; &amp;&amp; \</span><br><span class="line">ninja &amp;&amp; \</span><br><span class="line">ninja install</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="安装-FFMPEG"><a href="#安装-FFMPEG" class="headerlink" title="安装 FFMPEG"></a>安装 FFMPEG</h2><p>最后一步，愉快执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">cd FFMPEG_PATH=$HOME/data/ffmpeg_sources &amp;&amp; \</span><br><span class="line">wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 &amp;&amp; \</span><br><span class="line">tar xjvf ffmpeg-snapshot.tar.bz2 &amp;&amp; \</span><br><span class="line">cd ffmpeg &amp;&amp; \</span><br><span class="line">PATH=&quot;$HOME/bin:$PATH&quot; PKG_CONFIG_PATH=&quot;$FFMPEG_PATH/ffmpeg_build/lib/pkgconfig&quot; ./configure \</span><br><span class="line">  --prefix=&quot;$FFMPEG_PATH/ffmpeg_build&quot; \</span><br><span class="line">  --pkg-config-flags=&quot;--static&quot; \</span><br><span class="line">  --extra-cflags=&quot;-I$FFMPEG_PATH/ffmpeg_build/include&quot; \</span><br><span class="line">  --extra-ldflags=&quot;-L$FFMPEG_PATH/ffmpeg_build/lib&quot; \</span><br><span class="line">  --extra-libs=&quot;-lpthread -lm&quot; \</span><br><span class="line">  --ld=&quot;g++&quot; \</span><br><span class="line">  --bindir=&quot;$HOME/bin&quot; \</span><br><span class="line">  --enable-gpl \</span><br><span class="line">  --enable-gnutls \</span><br><span class="line">  --enable-libaom \</span><br><span class="line">  --enable-libass \</span><br><span class="line">  --enable-libfdk-aac \</span><br><span class="line">  --enable-libfreetype \</span><br><span class="line">  --enable-libmp3lame \</span><br><span class="line">  --enable-libopus \</span><br><span class="line">  --enable-libsvtav1 \</span><br><span class="line">  --enable-libdav1d \</span><br><span class="line">  --enable-libvorbis \</span><br><span class="line">  --enable-libvpx \</span><br><span class="line">  --enable-libx264 \</span><br><span class="line">  --enable-libx265 \</span><br><span class="line">  --enable-nonfree &amp;&amp; \</span><br><span class="line">PATH=&quot;$HOME/bin:$PATH&quot; make &amp;&amp; \</span><br><span class="line">make install &amp;&amp; \</span><br><span class="line">hash -r</span><br></pre></td></tr></table></figure>
+
+<h2 id="收尾"><a href="#收尾" class="headerlink" title="收尾"></a>收尾</h2><p>现在安装就已经全部完成，接下来执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source ~/.profile</span><br></pre></td></tr></table></figure>
+<p>重启 shell ，输入 <code>ffmpeg</code> 即可运行。</p>
+<p>最后执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unset FFMPEG_PATH</span><br></pre></td></tr></table></figure>
+
+<p>释放目录变量。</p>
+<h2 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h2><p>1 nasm libx264-dev libx265-dev libnuma-dev libvpx-dev libfdk-aac-dev libopus-dev 我都想手动编译。<br>去 <a target="_blank" rel="noopener" href="https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu">https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu</a> 查看教程。  </p>
+<p>2 为什么最后装在 $HOME&#x2F;bin 文件夹下？<br>参照官方说法，放在这个位置不影响系统文件、不和安装的包（包括 ffmpeg ）冲突，方便卸载或者移动，不需要root权限。  </p>
+<p>3 如何卸载？<br>删除 $HOME&#x2F;bin 下有关 ffmpeg 的文件夹即可。<br><code>rm -rf ~/bin/&#123;ffmpeg,ffprobe,ffplay,x264,x265,nasm&#125;</code><br>如果想要执行之前的临时文件，可以执行<br><code>rm -rf $FFMPEG_PATH</code><br>$FFMPEG_PATH 为当时设置的目录，其实手动删除即可。  </p>
+<p>4 我连不上外网<br>两种办法可供参考：爬梯子，或者在本地把库下载了之后拷到 ffmpeg_resource 文件夹之下，再把开头为 git 或 wget 的那一行去掉。  </p>
+
+    
+  </article>
+
+  
+      
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+</div>
+  
+  
+    <script async src="../../../../js/copy-codeblock.js?v=1703230302264"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          <head>
+  <!-- ... -->
+  <link
+    rel="stylesheet"
+    href="/images/waline.css"
+  />
+  <!-- ... -->
+</head>
+<body>
+  <!-- ... -->
+  <div id="waline"></div>
+  <script type="module">
+    import { init } from '/images/waline.mjs';
+    init({
+      el: '#waline',
+      serverURL: 'https://blog-comments-sepia.vercel.app',
+    });
+  </script>
+</body>
+
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B4%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="toc-number">1.</span> <span class="toc-text">说在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">多线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A6%96%E5%85%88%E7%A1%AE%E5%AE%9A%E5%AE%89%E8%A3%85%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="toc-number">3.</span> <span class="toc-text">首先确定安装的位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">4.</span> <span class="toc-text">基础库的安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B2%A1%E5%8A%9E%E6%B3%95%E7%9B%B4%E6%8E%A5%E5%AE%89%E8%A3%85%E7%9A%84%E5%BA%93"><span class="toc-number">5.</span> <span class="toc-text">没办法直接安装的库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-FFMPEG"><span class="toc-number">6.</span> <span class="toc-text">安装 FFMPEG</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%B6%E5%B0%BE"><span class="toc-number">7.</span> <span class="toc-text">收尾</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AF%E8%83%BD%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">8.</span> <span class="toc-text">可能遇到的问题</span></a></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div></div></body></html>
