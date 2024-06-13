@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="zh"><head>
+<title>[MLSys&#39;23] 训练与推理之间的“噪声” - arr2&#39;s blog</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+<meta name="description" content="[MLSys’23] 训练与推理之间的“噪声”全文结构简单，实验充分（涵盖 CV 和部分 NLP），讲述了训练和推理之间可能导致精度下降的一些 gap ，某种程度上也解释了“为什么同样的方法，人家的效果好”；反过来也可以作为设计模型输入输出的一些 trick。此外，学习过程中也可以了解一点图像、模型训练和量化的基础知识。是很好的文章。 全文的重点在于解决了如下问题：  从训练到推理，有哪些不确定性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[MLSys&#39;23] 训练与推理之间的“噪声”">
+<meta property="og:url" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/index.html">
+<meta property="og:site_name" content="arr2&#39;s blog">
+<meta property="og:description" content="[MLSys’23] 训练与推理之间的“噪声”全文结构简单，实验充分（涵盖 CV 和部分 NLP），讲述了训练和推理之间可能导致精度下降的一些 gap ，某种程度上也解释了“为什么同样的方法，人家的效果好”；反过来也可以作为设计模型输入输出的一些 trick。此外，学习过程中也可以了解一点图像、模型训练和量化的基础知识。是很好的文章。 全文的重点在于解决了如下问题：  从训练到推理，有哪些不确定性">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240523235011152.webp">
+<meta property="og:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240530165435139.webp">
+<meta property="og:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240530170729799.webp">
+<meta property="og:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240530171303549.webp">
+<meta property="og:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240530171355922.webp">
+<meta property="og:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240530172849982.webp">
+<meta property="og:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240530173046284.webp">
+<meta property="og:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240530173058424.webp">
+<meta property="article:published_time" content="2024-06-13T15:47:09.000Z">
+<meta property="article:modified_time" content="2024-06-13T16:07:22.414Z">
+<meta property="article:author" content="arr2">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://arrrr2.github.io/2024/06/13/sys-noise-mlsys23/image-20240523235011152.webp">
+
+<link rel="stylesheet" href="../../../../lib/fancybox/fancybox.css">
+<link rel="stylesheet" href="../../../../lib/mdui_043tiny/mdui.css">
+
+
+<link rel="stylesheet" href="../../../../lib/iconfont/iconfont.css?v=1718294848503">
+
+<link rel="stylesheet" href="../../../../css/style.css?v=1718294848503">
+
+
+
+
+
+
+<script src="../../../../lib/mdui_043tiny/mdui.js" async></script>
+<script src="../../../../lib/fancybox/fancybox.umd.js" async></script>
+<script src="../../../../lib/lax.min.js" async></script>
+
+
+<script async src="../../../../js/app.js?v=1718294848503"></script>
+
+ 
+
+
+
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+<meta name="generator" content="Hexo 7.0.0"></head><body class="nexmoe mdui-drawer-body-left"><div id="nexmoe-background"><div class="nexmoe-bg" style="background-image: url(https://i.dawnlab.me/b5a7e61560facdd5b8aa9683fce147d7.png)"></div><div class="mdui-appbar mdui-shadow-0"><div class="mdui-toolbar"><a class="mdui-btn mdui-btn-icon mdui-ripple" mdui-drawer="{target: &#039;#drawer&#039;, swipe: true}" title="menu"><i class="mdui-icon nexmoefont icon-menu"></i></a><div class="mdui-toolbar-spacer"></div><a class="mdui-btn mdui-btn-icon" href="../../../../index.html" title="arr2"><img src="/images/rin.webp" alt="arr2"></a></div></div></div><div id="nexmoe-header"><div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="../../../../index.html" title="arr2">
+            <img src="/images/rin.webp" alt="arr2" alt="arr2">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>文章</span>3</div>
+        <div><span>标签</span>0</div>
+        <div><span>分类</span>0</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../index.html" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../archive.html" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../friends.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../about.html" title="关于自己">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于自己
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple false" href="../../../../comment_board.html" title="留言板">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                留言板
+            </div>
+        </a>
+        
+    </div>
+    
+    
+        
+        <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+         
+            <form id="search_form" action_e="https://cn.bing.com/" onsubmit="return search();">
+                <label><input id="search_value" name="q" type="search" placeholder="搜索"></label>
+            </form>
+         
+    </div>
+</div>
+
+
+
+
+    
+        
+        <div class="nexmoe-widget-wrap">
+	<div class="nexmoe-widget nexmoe-social">
+		<a
+			class="mdui-ripple"
+			href="https://qq.com"
+			target="_blank"
+			mdui-tooltip="{content: 'QQ'}"
+			style="
+				color: rgb(249, 174, 8);
+				background-color: rgba(249, 174, 8, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-QQ"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://bilibili.com"
+			target="_blank"
+			mdui-tooltip="{content: '哔哩哔哩'}"
+			style="
+				color: rgb(231, 106, 141);
+				background-color: rgba(231, 106, 141, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-bilibili"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://github.com/"
+			target="_blank"
+			mdui-tooltip="{content: 'GitHub'}"
+			style="
+				color: rgb(25, 23, 23);
+				background-color: rgba(25, 23, 23, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-github"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://www.zhihu.com/"
+			target="_blank"
+			mdui-tooltip="{content: '知乎'}"
+			style="
+				color: rgb(30, 136, 229);
+				background-color: rgba(30, 136, 229, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-zhihu"
+			></i> </a
+		><a
+			class="mdui-ripple"
+			href="https://twitter.com/"
+			target="_blank"
+			mdui-tooltip="{content: 'Twitter'}"
+			style="
+				color: rgb(59, 151, 239);
+				background-color: rgba(59, 151, 239, .1);
+			"
+		>
+			<i
+				class="nexmoefont icon-twitter"
+			></i> </a
+		>
+	</div>
+</div>
+
+    
+        
+        
+
+    
+        
+        
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">文章归档</h3>
+    <div class="nexmoe-widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="../../../../archives/2024/">2024</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="../../../../archives/2023/">2023</a><span class="archive-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+
+
+    
+        
+        
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">最新文章</h3>
+    <div class="nexmoe-widget">
+      <ul>
+        
+          <li>
+            <a href="">[MLSys&#39;23] 训练与推理之间的“噪声”</a>
+          </li>
+        
+          <li>
+            <a href="../../../../2023/12/22/ffmpeg-install/">FFmpeg 从入门到升天：1) Linux 下编译安装</a>
+          </li>
+        
+          <li>
+            <a href="../../../../2023/11/29/Hello-World/">Hello World!</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+   
+    <div class="nexmoe-copyright">
+        &copy; 2024 arr2
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        <ul>
+  <li>
+    本页被打开了
+    <span class="waline-pageview-count" />
+    次
+  </li>
+</ul>
+<script type="module">
+  import { pageviewCount } from '/images/waline.mjs';
+
+  pageviewCount({
+    serverURL: 'https://blog-comments-sepia.vercel.app',
+    path: window.location.pathname,
+  });
+</script>
+
+    </div>
+</div><!-- .nexmoe-drawer --></div><div id="nexmoe-content"><div class="nexmoe-primary"><div class="nexmoe-post">
+  <article>
+    
+        <div class="nexmoe-post-cover absolute" style="padding-top: 56.25%;"> 
+            <img src="/2024/06/13/sys-noise-mlsys23/1718294604351.webp" alt="[MLSys&#39;23] 训练与推理之间的“噪声”" loading="lazy">
+            <h1>[MLSys&#39;23] 训练与推理之间的“噪声”</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta">
+    <div class="nexmoe-rainbow">
+        <a class="nexmoefont icon-calendar-fill">2024年06月13日</a>
+        
+        
+    </div>
+    
+    
+    
+    
+    
+</div>
+
+    <h1 id="MLSys’23-训练与推理之间的“噪声”"><a href="#MLSys’23-训练与推理之间的“噪声”" class="headerlink" title="[MLSys’23] 训练与推理之间的“噪声”"></a>[MLSys’23] 训练与推理之间的“噪声”</h1><p>全文结构简单，实验充分（涵盖 CV 和部分 NLP），讲述了训练和推理之间可能导致精度下降的一些 gap ，某种程度上也解释了“为什么同样的方法，人家的效果好”；反过来也可以作为设计模型输入输出的一些 trick。此外，学习过程中也可以了解一点图像、模型训练和量化的基础知识。是很好的文章。</p>
+<p>全文的重点在于解决了如下问题：</p>
+<ul>
+<li><p>从训练到推理，有哪些不确定性会导致精度下降？</p>
+</li>
+<li><p>这些不确定性会导致怎样的后果？</p>
+</li>
+<li><p>如何解决这些不确定性？</p>
+</li>
+</ul>
+<p>另外，文章提出了一个 benchmark 框架（此处略）。</p>
+<h2 id="训练和推理之间，有哪些-GAP？"><a href="#训练和推理之间，有哪些-GAP？" class="headerlink" title="训练和推理之间，有哪些 GAP？"></a>训练和推理之间，有哪些 GAP？</h2><p><img onerror="imgOnError(this);" data-fancybox="gallery" src="image-20240523235011152.webp" alt="image-20240523235011152" data-caption="image-20240523235011152" loading="lazy"></p>
+<p>由图片所示，一个训练好的模型在推理的时候还会遭到各种噪声。不过考虑到它们其实是推理过程中的不一致性，叫“噪声”似乎不大准确。遗憾的是，从预处理到后处理，这种不一致十分充分冗杂，下面按照时间轴来。</p>
+<h3 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h3><p>对于推理一张图像的过程来说，可能引入的操作有：解码（如Jpeg），色域转换和缩放。这三个过程都能带来不一致性：</p>
+<p>解码：对于一张jpeg图像来说，它是如何被编码的？不管是怎样的有损压缩，为了减小体积都要丢弃一些高频信息。分辨高低频的方式就是离散余弦变换：对于每个8x8的小块，通过变换把图像分为低频成分和高频成分，解码的时候再通过高频低频成分做逆变换推出像素值。总之需要进行一些计算操作，但是显然浮点的操作比较费时费力且冗余较大，于是就有快速DCT变换（查表法）来加速。但是①不同的库里，查找表有些微不一致；②各类矩阵运算里可能有不同的上下取整带来的不同。</p>
+<p>色域转换：神经网络里面的输入一般都是RGB格式，但是图像里面一般是YUV格式——Y是亮度，UV是色度。这之间的浮点转换显而易见的在不同库里可能有精度的区别；并且为了减小体积，人们经常会利用人眼对亮度更敏感的原理，把色度用更小的分辨率存起来，又造成了一点差异。</p>
+<p>缩放：缩放的算法很多，如最邻近、双线性、三次、Lanczos等等。这些算法都会在保留细节和减少伪影做一些权衡。显然现在的算法也不大够好，要不然也不用AI放大了。不同的库会默认选择不同的算法，输入由此也变得不一样了。一图胜千言（3x）：</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="image-20240530165435139.webp" alt="image-20240530165435139" data-caption="image-20240530165435139" loading="lazy"></p>
+<h3 id="推理"><a href="#推理" class="headerlink" title="推理"></a>推理</h3><p>推理里面最直接的一点：量化！FP32, TF32, FP16, INT8，为了加速，各种各样的数据格式千奇百怪，如果直接做了量化，产生的值必然是不同的；并且如果原先用fp32计算出来的值很大或者很小，用fp16再计算，推理的时候必然会产生上下溢。</p>
+<p>上采样的方式也会产生明显的影响，这一点和预处理的缩放一样，肉眼就很明显了，对于神经网络来说也做难怪会有影响。这一点对于图像分割的任务比较重要。</p>
+<p>此外还有池化的上下修（我暂且先这么叫着）：如果池化核没法整除一个特征图（比如33x33的特征图，2x2的核），那么池化后的特征图大小也有待商榷，有的库会倾向于上修（17x17），有的则相反（16x16），这多出来或者少进去的一行一列也是对结果有影响的。</p>
+<h3 id="后处理"><a href="#后处理" class="headerlink" title="后处理"></a>后处理</h3><p>把输出变成实际结果也要一点处理，比如非极大值抑制（NMS）里面各种框如何排序；Softmax里面如何舍入舍出等等。总之七七八八的还是那些问题。</p>
+<h2 id="GAP-的总结"><a href="#GAP-的总结" class="headerlink" title="GAP 的总结"></a>GAP 的总结</h2><p>虽然说算法是具有确定性的，但是根据库的不同总会做一点不同。在此试图做一点另外一个角度的归纳。这些不同的原因大概有如下3点：</p>
+<ol>
+<li><p>精度：不管是预处理还是推理还是后处理，都会涉及到浮点操作，于是受到精度的影响。但是精度是不一定的。</p>
+</li>
+<li><p>舍入：尺寸也好，输出值也好，如果要被量化（降低精度的时候），到底是向上取值还是向下取值，这是不一定的。</p>
+</li>
+<li><p>算法真的不一样。像插值或者图像解码中会遇到这种问题，这就真没什么好说的了。</p>
+</li>
+</ol>
+<p>原文做了一点可视化，可视化的结果就很明显：</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="image-20240530170729799.webp" alt="image-20240530170729799" data-caption="image-20240530170729799" loading="lazy"></p>
+<h2 id="影响多大？"><a href="#影响多大？" class="headerlink" title="影响多大？"></a>影响多大？</h2><p>直接上实验：原文探究了解码、缩放、色域、精度、上下修以及各种操作都不同的影响。上表：</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="image-20240530171303549.webp" alt="image-20240530171303549" data-caption="image-20240530171303549" loading="lazy"></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="image-20240530171355922.webp" alt="image-20240530171355922" data-caption="image-20240530171355922" loading="lazy"></p>
+<p>作者在图像分类、检测、分割以及NLP上面对能做的变化做了些实验。能够得到的几个结论：</p>
+<ol>
+<li><p>推理精度的影响相对而言不大。图像分类里面fp16带来的下降基本都在0.1%以内，后面作者基本都不做了。int8带来的影响也不到1%，NLP也是。</p>
+</li>
+<li><p>模型越大越鲁棒。大体而言，模型越大，delta占比就越低。</p>
+</li>
+</ol>
+<p>原作对于NLP任务做的不多，CV任务还有几个结论：</p>
+<ol>
+<li>实锤了“CNN模型关注细节，Transformer关注全局”。分类任务中，从CNN的角度来说，图像解码和缩放带来的细节区别远大于色域转换带来的全局差异。Transformer正好相反。</li>
+<li>池化操作、特征图上采样、后处理很容易带来几个点的差异，使得更好的模型设计功亏一篑。</li>
+<li>目标检测和分割任务对于图像预处理没那么敏感。</li>
+</ol>
+<h2 id="怎么办？"><a href="#怎么办？" class="headerlink" title="怎么办？"></a>怎么办？</h2><h3 id="现有方法"><a href="#现有方法" class="headerlink" title="现有方法"></a>现有方法</h3><p>一般来说，大家都会用加噪声、Augmix之类的方法进行数据增广；在对抗学习那里还会有一些对抗训练的方法。</p>
+<p>然而比较遗憾的是各种增广都基于一个库的话神经网络是提前感知不到的。实验来看也是并没有甚么O用。直接上图：</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="image-20240530172849982.webp" alt="image-20240530172849982" data-caption="image-20240530172849982" loading="lazy"></p>
+<h3 id="作者提出的方法"><a href="#作者提出的方法" class="headerlink" title="作者提出的方法"></a>作者提出的方法</h3><p>由于输入的影响很多时候是最大的，并且可以很容易复现（不同的库带来的不同实现方法，实际上import一下就改了），所以就把各种输入方法都喂进网络里就好。训练的时候只要随机挑一个库打开图片，随机用某一个库挑一种算法进行缩放，轻松地就能让网络学习到这些“噪声”。</p>
+<p>很naive的idea，很简单粗暴，但是好用。</p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="image-20240530173046284.webp" alt="image-20240530173046284" data-caption="image-20240530173046284" loading="lazy"></p>
+<p><img onerror="imgOnError(this);" data-fancybox="gallery" src="image-20240530173058424.webp" alt="image-20240530173058424" data-caption="image-20240530173058424" loading="lazy"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>内容其实很简单，也不像是CV论文那样使用了各种fancy的方法，大体上都是以实验为主；最后提出的方法也很粗暴。但是整个文章实际上回答了一个很基础的问题：“为什么他点那么高，我死活就刷不出来？”</p>
+<p>笔者在复现SR模型的时候发现过这个十分严重的问题，只要把退化时下采样方式从bicubic改成nearest，小模型上的PSNR可以轻松掉个2~3左右，提升这么大的值已经足够发一篇了。</p>
+<p>另一个重要的点在于，在各种“精妙的设计”之下，还有很多基础的问题没有解决。正可谓 “Garbage in, garbage out”，这种严格要求数据的工程方法有时反倒能成为解决学术问题的关键。</p>
+
+    
+  </article>
+
+  
+      
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+   
+    
+</div>
+  
+  
+    <script async src="../../../../js/copy-codeblock.js?v=1718294848481"></script>
+  
+
+  
+      <div class="nexmoe-post-footer">
+          <head>
+  <!-- ... -->
+  <link
+    rel="stylesheet"
+    href="/images/waline.css"
+  />
+  <!-- ... -->
+</head>
+<body>
+  <!-- ... -->
+  <div id="waline"></div>
+  <script type="module">
+    import { init } from '/images/waline.mjs';
+    init({
+      el: '#waline',
+      serverURL: 'https://blog-comments-sepia.vercel.app',
+    });
+  </script>
+</body>
+
+      </div>
+  
+</div></div><div class="nexmoe-post-right">    <div class="nexmoe-fixed">
+        <div class="nexmoe-tool">
+
+            
+
+            
+            
+            <button class="mdui-fab catalog" style="overflow:unset;">
+                <i class="nexmoefont icon-i-catalog"></i>
+                <div class="nexmoe-toc">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#MLSys%E2%80%9923-%E8%AE%AD%E7%BB%83%E4%B8%8E%E6%8E%A8%E7%90%86%E4%B9%8B%E9%97%B4%E7%9A%84%E2%80%9C%E5%99%AA%E5%A3%B0%E2%80%9D"><span class="toc-number">1.</span> <span class="toc-text">[MLSys’23] 训练与推理之间的“噪声”</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E5%92%8C%E6%8E%A8%E7%90%86%E4%B9%8B%E9%97%B4%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B-GAP%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">训练和推理之间，有哪些 GAP？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E5%A4%84%E7%90%86"><span class="toc-number">1.1.1.</span> <span class="toc-text">预处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E7%90%86"><span class="toc-number">1.1.2.</span> <span class="toc-text">推理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E5%A4%84%E7%90%86"><span class="toc-number">1.1.3.</span> <span class="toc-text">后处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GAP-%E7%9A%84%E6%80%BB%E7%BB%93"><span class="toc-number">1.2.</span> <span class="toc-text">GAP 的总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%B1%E5%93%8D%E5%A4%9A%E5%A4%A7%EF%BC%9F"><span class="toc-number">1.3.</span> <span class="toc-text">影响多大？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="toc-number">1.4.</span> <span class="toc-text">怎么办？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%B0%E6%9C%89%E6%96%B9%E6%B3%95"><span class="toc-number">1.4.1.</span> <span class="toc-text">现有方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%9C%E8%80%85%E6%8F%90%E5%87%BA%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">1.4.2.</span> <span class="toc-text">作者提出的方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.5.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+                </div>
+            </button>
+            
+
+            
+
+            <a href="#nexmoe-content" class="backtop toc-link" aria-label="Back To Top" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+        </div>
+    </div>
+</div></div><div id="nexmoe-footer"><!--!--></div><div id="nexmoe-search-space"><div class="search-container"><div class="search-header"><div class="search-input-container"><input class="search-input" type="text" placeholder="搜索" onInput="sinput();"></div><a class="search-close" onclick="sclose();">×</a></div><div class="search-body"></div></div></div><div></div></body></html>
